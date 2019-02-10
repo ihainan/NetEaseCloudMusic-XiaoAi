@@ -1,0 +1,7 @@
+{
+    "host": "YOUR_SERVICE_HOST",
+    "port": 4444,
+    "api_url": "http://API_HOST:API_PORT",
+    "username": "USERNAME_HERE",
+    "password": "PASSWORD_HERE"
+}
