@@ -88,8 +88,15 @@ def parse_input(event):
     req = xiaoai_request(event)
     if req.request.type == 0:
         # 技能进入请求
-        if req.query == '让网易音乐播放我的红心':
-            return get_favorites()
+        if req.request.slot_info.intent_name == 'Favorites':
+            if req.query == "让网易音乐播放收藏":
+                return get_favorites()
+            elif req.query == "让网易音乐随机播放收藏":
+                return get_random_favorites()
+            else:
+                return build_text_message("我没听懂欸", is_session_end=True, open_mic=False)
+        elif req.request.slot_info.intent_name == 'Ramdom_Recommendation':
+            return get_random_recommendation()        
         else:
             return build_text_message('干啥呢？', is_session_end=False, open_mic=True)
     elif req.request.type == 1:
