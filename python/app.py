@@ -12,13 +12,13 @@ from xiaoai import (XiaoAIAudioItem, XiaoAIDirective, XiaoAIOpenResponse,
                     xiaoai_request, xiaoai_response)
 
 
-serviceURL = "http://YOUR_SERVICE_IP:SERVICE_PORT"
+serviceURL = 'http://YOUR_SERVICE_IP:SERVICE_PORT'
 
 def build_text_message(to_speak, is_session_end, open_mic):
     xiao_ai_response = XiaoAIResponse(
         to_speak=XiaoAIToSpeak(type_=0, text=to_speak),
         open_mic=open_mic)
-    response = xiaoai_response(XiaoAIOpenResponse(version="1.0",
+    response = xiaoai_response(XiaoAIOpenResponse(version='1.0',
                                                   is_session_end=is_session_end,
                                                   response=xiao_ai_response))
     return response
@@ -28,21 +28,21 @@ def build_music_message(to_speak, mp3_urls):
     all_list = []
     if to_speak is not None:
         info_tts = XiaoAIDirective(
-            type_="tts",
+            type_='tts',
             tts_item=XiaoAITTSItem(
-                type_="0", text=to_speak
+                type_='0', text=to_speak
             ))
 
         all_list.append(info_tts)
     for url in mp3_urls:
         info_audio = XiaoAIDirective(
-            type_="audio",
+            type_='audio',
             audio_item=XiaoAIAudioItem(stream=XiaoAIStream(url=url))
         )
         all_list.append(info_audio)
     xiao_ai_response = XiaoAIResponse(directives=all_list, open_mic=False)
     response = xiaoai_response(XiaoAIOpenResponse(
-        version="1.0", is_session_end=True, response=xiao_ai_response))
+        version='1.0', is_session_end=True, response=xiao_ai_response))
     return response
 
 
@@ -89,19 +89,20 @@ def parse_input(event):
     if req.request.type == 0:
         # 技能进入请求
         if req.request.slot_info.intent_name == 'Favorites':
-            if req.query == "让网易音乐播放收藏":
-                return get_favorites()
-            elif req.query == "让网易音乐随机播放收藏":
+            if '随机' in req.query:
                 return get_random_favorites()
+            elif '收藏' in req.query :
+                return get_favorites()
             else:
-                return build_text_message("我没听懂欸", is_session_end=True, open_mic=False)
-        elif req.request.slot_info.intent_name == 'Ramdom_Recommendation':
+                return build_text_message('我没听懂欸', is_session_end=True, open_mic=False)
+        elif req.request.slot_info.intent_name == 'Recommendation':
             return get_random_recommendation()        
         else:
-            return build_text_message('干啥呢？', is_session_end=False, open_mic=True)
+            return build_text_message('干啥呢', is_session_end=False, open_mic=True)
     elif req.request.type == 1:
+        # Issue: http://www.miui.com/thread-21675179-1-1.html
         if req.request.slot_info.intent_name == 'Favorites':
-            if req.query == "随机播放收藏" or req.query == "随机播放收藏歌曲":
+            if '随机' in req.query:
                 return get_random_favorites()
             else:
                 return get_favorites()
@@ -112,13 +113,13 @@ def parse_input(event):
         elif req.request.slot_info.intent_name == 'Ramdom_Recommendation':
             return get_random_recommendation()
         elif req.request.slot_info.intent_name == 'Mi_Exit':
-            return build_text_message("再见了您！", is_session_end=True, open_mic=False)
+            return build_text_message('再见了您！', is_session_end=True, open_mic=False)
         else:
-            return build_text_message("你可以说：播放收藏", is_session_end=False, open_mic=True)
+            return build_text_message('你可以说：收藏', is_session_end=False, open_mic=True)
     elif req.request.type == 2:
-        return build_text_message("再见了您！", is_session_end=True, open_mic=False)
+        return build_text_message('再见了您！', is_session_end=True, open_mic=False)
     else:
-        return build_text_message("我没听懂欸", is_session_end=True, open_mic=False)
+        return build_text_message('我没听懂欸', is_session_end=True, open_mic=False)
 
 
 app = Flask(__name__)
