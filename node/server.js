@@ -13,7 +13,9 @@ const password = config.password
 
 rp({
 	headers: {
-		xhrFields: { withCredentials: true }
+		xhrFields: {
+			withCredentials: true
+		}
 	},
 	method: 'GET',
 	resolveWithFullResponse: true,
@@ -30,13 +32,15 @@ rp({
 	// Get the ID of user's favorite song list
 	rp({
 		headers: {
-			xhrFields: { withCredentials: true }
+			xhrFields: {
+				withCredentials: true
+			}
 		},
 		resolveWithFullResponse: true,
 		method: 'GET',
-		// TODO: get username and password from configuration file
 		uri: apiService + '/user/playlist?uid=' + uid,
 	}).then(function (response) {
+		console.log(response.body)
 		// Extrat the ID number of first play list
 		const playListJSON = JSON.parse(response.body)
 		const favoriteListID = playListJSON.playlist[0].id
@@ -55,7 +59,9 @@ rp({
 			rp({
 				headers: {
 					Cookie: cookieString,
-					xhrFields: { withCredentials: true }
+					xhrFields: {
+						withCredentials: true
+					}
 				},
 				resolveWithFullResponse: true,
 				method: 'GET',
@@ -87,7 +93,9 @@ rp({
 			rp({
 				headers: {
 					Cookie: cookieString,
-					xhrFields: { withCredentials: true }
+					xhrFields: {
+						withCredentials: true
+					}
 				},
 				resolveWithFullResponse: true,
 				method: 'GET',
@@ -124,13 +132,107 @@ rp({
 			})
 		})
 
+		// Play one of user's daily recommendation song list
+		app.get('/random_recommended_list', function (req, res) {
+			res.setHeader('Content-Type', 'application/json')
+			rp({
+				headers: {
+					Cookie: cookieString,
+					xhrFields: {
+						withCredentials: true
+					}
+				},
+				resolveWithFullResponse: true,
+				method: 'GET',
+				url: apiService + '/recommend/resource',
+			}).then(function (response) {
+				if (response.statusCode == 200) {
+					const recommend = JSON.parse(response.body).recommend
+					const randomIndex = Math.floor(Math.random() * Math.floor(recommend.length))
+					const listName = recommend[randomIndex].name
+					const listID = recommend[randomIndex].id
+					console.log('listName = ' + listName + ', listID = ' + listID)
+
+					rp({
+						headers: {
+							Cookie: cookieString,
+							xhrFields: {
+								withCredentials: true
+							}
+						},
+						resolveWithFullResponse: true,
+						method: 'GET',
+						url: apiService + '/likelist?uid=' + listID,
+					}).then(function (response) {
+						if (response.statusCode == 200) {
+							const json = JSON.parse(response.body)
+							const ids = json.ids
+							var result = {}
+							var completedRequests = 0
+							if (ids.length != 0) {
+								const n = Math.min(20, ids.length)
+								const firstTwentySongs = ids
+									.map(x => ({
+										x,
+										r: Math.random()
+									}))
+									.sort((a, b) => a.r - b.r)
+									.map(a => a.x)
+									.slice(0, n)
+								result.name = listName
+								result.result = []
+								firstTwentySongs.forEach(function (id) {
+									console.log(id)
+									result.result.push(selfURL + '/song?id=' + id)
+
+									// return result to user
+									completedRequests += 1
+									if (completedRequests == firstTwentySongs.length) {
+										res.status(200)
+										res.send(JSON.stringify(result))
+									}
+								})
+							} else {
+								res.status(200)
+								res.send(JSON.stringify(result))
+							}
+						} else {
+							res.status(500)
+							res.send(JSON.stringify({
+								'error': 'Failed to get like list'
+							}))
+						}
+					}).catch(function (error) {
+						console.log('Error: ' + error)
+						res.status(500)
+						res.send(JSON.stringify({
+							'error': error
+						}))
+					})
+				} else {
+					res.status(500)
+					res.send(JSON.stringify({
+						'error': 'Failed to get like list'
+					}))
+				}
+			}).catch(function (error) {
+				console.log('Error: ' + error)
+				res.status(500)
+				res.send(JSON.stringify({
+					'error': error
+				}))
+			})
+		})
+
 		// Randomly choose user's favorite songs (30 at most)
 		app.get('/random_likelist', function (req, res) {
 			res.setHeader('Content-Type', 'application/json')
 			rp({
 				headers: {
 					Cookie: cookieString,
-					xhrFields: { withCredentials: true }
+					xhrFields: {
+						withCredentials: true
+					}
 				},
 				resolveWithFullResponse: true,
 				method: 'GET',
@@ -144,7 +246,10 @@ rp({
 					if (ids.length != 0) {
 						const n = Math.min(20, ids.length)
 						const firstTwentySongs = ids
-							.map(x => ({ x, r: Math.random() }))
+							.map(x => ({
+								x,
+								r: Math.random()
+							}))
 							.sort((a, b) => a.r - b.r)
 							.map(a => a.x)
 							.slice(0, n)
@@ -185,7 +290,9 @@ rp({
 			rp({
 				headers: {
 					Cookie: cookieString,
-					xhrFields: { withCredentials: true }
+					xhrFields: {
+						withCredentials: true
+					}
 				},
 				resolveWithFullResponse: true,
 				method: 'GET',
@@ -221,7 +328,7 @@ rp({
 				}))
 			})
 		})
-		
+
 		// Search artist
 
 

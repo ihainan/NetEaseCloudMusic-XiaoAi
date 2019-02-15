@@ -14,7 +14,7 @@ Rename `config.json.template` to `config.json`, and then edit this file.
 |----------|:-------------:|
 | host |  The hostname or IP address of your current machine (`0.0.0.0` is not supported) |
 | port |  The port you want to use to start this service   |
-| api_url | The URL of NetEase Cloud Music API service, you can use `http://hk2.ihainan.me:3000/` |
+| api_url | The URL of NetEase Cloud Music API service, you can use `http://hk2.ihainan.me:3000` |
 | username | The username of your NetEase Cloud Music account |
 | password | The password of your NetEase Cloud Music account |
 

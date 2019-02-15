@@ -72,6 +72,17 @@ def get_recommendation():
     # 顺序播放每日推荐歌曲
     return build_music_message('好嘞！', mp3_urls)
 
+def get_random_recommended_list():
+    # 随机获取每日推荐歌单
+    from random import shuffle
+    result = json.loads(requests.get(
+        serviceURL + '/random_recommended_list').text)
+    mp3_urls = result['result']
+    name = result['name']
+    shuffle(mp3_urls)
+
+    # 随机播放每日推荐歌曲
+    return build_music_message('播放歌单 ' + name, mp3_urls)
 
 def get_random_recommendation():
     # 随机获取每日推荐列表
@@ -112,6 +123,8 @@ def parse_input(event):
             return get_random_favorites()
         elif req.request.slot_info.intent_name == 'Ramdom_Recommendation':
             return get_random_recommendation()
+        elif req.request.slot_info.intent_name == 'Ramdom_Recommended_List':
+            return get_random_recommended_list()
         elif req.request.slot_info.intent_name == 'Mi_Exit':
             return build_text_message('再见了您！', is_session_end=True, open_mic=False)
         else:
