@@ -52,7 +52,7 @@ def get_favorites():
         serviceURL + '/likelist').text)['result']
 
     # 顺序播放红心歌曲
-    return build_music_message('好嘞！', mp3_urls)
+    return build_music_message('马上播放收藏歌曲', mp3_urls)
 
 
 def get_random_favorites():
@@ -61,7 +61,7 @@ def get_random_favorites():
         serviceURL + '/random_likelist').text)['result']
 
     # 随机播放顺序播放红心歌曲
-    return build_music_message('好嘞！', mp3_urls)
+    return build_music_message('马上乱序播放收藏歌曲', mp3_urls)
 
 
 def get_recommendation():
@@ -70,7 +70,7 @@ def get_recommendation():
         serviceURL + '/recommend').text)['result']
 
     # 顺序播放每日推荐歌曲
-    return build_music_message('好嘞！', mp3_urls)
+    return build_music_message('马上播放每日推荐', mp3_urls)
 
 def get_random_recommended_list():
     # 随机获取每日推荐歌单
@@ -82,7 +82,7 @@ def get_random_recommended_list():
     shuffle(mp3_urls)
 
     # 随机播放每日推荐歌曲
-    return build_music_message('播放歌单 ' + name, mp3_urls)
+    return build_music_message('马上播放推荐歌单 ' + name, mp3_urls)
 
 def get_random_recommendation():
     # 随机获取每日推荐列表
@@ -92,7 +92,7 @@ def get_random_recommendation():
     shuffle(mp3_urls)
 
     # 随机播放每日推荐歌曲
-    return build_music_message('好嘞！', mp3_urls)
+    return build_music_message('马上乱序播放每日推荐 ', mp3_urls)
 
 
 def parse_input(event):
@@ -100,14 +100,11 @@ def parse_input(event):
     if req.request.type == 0:
         # 技能进入请求
         if req.request.slot_info.intent_name == 'Favorites':
-            if '随机' in req.query:
-                return get_random_favorites()
-            elif '收藏' in req.query :
-                return get_favorites()
-            else:
-                return build_text_message('我没听懂欸', is_session_end=True, open_mic=False)
+            return get_favorites()
         elif req.request.slot_info.intent_name == 'Recommendation':
-            return get_random_recommendation()        
+            return get_random_recommendation()     
+        elif req.request.slot_info.intent_name == 'Ramdom_Recommended_List':
+            return get_random_recommended_list()
         else:
             return build_text_message('干啥呢', is_session_end=False, open_mic=True)
     elif req.request.type == 1:

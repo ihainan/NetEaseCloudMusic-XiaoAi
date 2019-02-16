@@ -152,7 +152,7 @@ rp({
 					const listName = recommend[randomIndex].name
 					const listID = recommend[randomIndex].id
 					console.log('listName = ' + listName + ', listID = ' + listID)
-
+					
 					rp({
 						headers: {
 							Cookie: cookieString,
@@ -162,40 +162,32 @@ rp({
 						},
 						resolveWithFullResponse: true,
 						method: 'GET',
-						url: apiService + '/likelist?uid=' + listID,
+						url: apiService + '/playlist/detail?id=' + listID,
 					}).then(function (response) {
 						if (response.statusCode == 200) {
-							const json = JSON.parse(response.body)
-							const ids = json.ids
+							const tracks = JSON.parse(response.body).playlist.tracks
+							const n = Math.min(40, tracks.length)
+							const songs = tracks
+							.map(x => ({
+								x,
+								r: Math.random()
+							}))
+							.sort((a, b) => a.r - b.r)
+							.map(a => a.x)
+							.slice(0, n)
 							var result = {}
 							var completedRequests = 0
-							if (ids.length != 0) {
-								const n = Math.min(20, ids.length)
-								const firstTwentySongs = ids
-									.map(x => ({
-										x,
-										r: Math.random()
-									}))
-									.sort((a, b) => a.r - b.r)
-									.map(a => a.x)
-									.slice(0, n)
-								result.name = listName
-								result.result = []
-								firstTwentySongs.forEach(function (id) {
-									console.log(id)
-									result.result.push(selfURL + '/song?id=' + id)
-
-									// return result to user
-									completedRequests += 1
-									if (completedRequests == firstTwentySongs.length) {
-										res.status(200)
-										res.send(JSON.stringify(result))
-									}
-								})
-							} else {
-								res.status(200)
-								res.send(JSON.stringify(result))
-							}
+							result.result = []
+							result.name = listName
+							songs.forEach(function (songInfo) {
+								result.result.push(selfURL + '/song?id=' + songInfo.id)
+								// return result to user
+								completedRequests += 1
+								if (completedRequests == songs.length) {
+									res.status(200)
+									res.send(JSON.stringify(result))
+								}
+							})
 						} else {
 							res.status(500)
 							res.send(JSON.stringify({
